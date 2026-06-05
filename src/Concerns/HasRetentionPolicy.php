@@ -1,0 +1,104 @@
+<?php
+
+namespace Contoweb\PrivacyRetention\Concerns;
+
+use Closure;
+use Contoweb\PrivacyRetention\Enums\AnonymizationStrategy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
+
+/**
+ * Adds anonymization behavior to a model, mirroring the SoftDeletes pattern.
+ *
+ * Requires the model to implement \Contoweb\PrivacyRetention\Contracts\Anonymizable.
+ */
+trait HasRetentionPolicy
+{
+    /**
+     * Boot the trait by merging the anonymized_at cast and registering events.
+     */
+    public function initializeHasRetentionPolicy(): void
+    {
+        $this->mergeCasts([$this->getAnonymizedAtColumn() => 'datetime']);
+        $this->addObservableEvents(['anonymizing', 'anonymized']);
+    }
+
+    /**
+     * Register an "anonymizing" model event callback.
+     */
+    public static function anonymizing(string|array|Closure $callback): void
+    {
+        static::registerModelEvent('anonymizing', $callback);
+    }
+
+    /**
+     * Register an "anonymized" model event callback.
+     */
+    public static function anonymized(string|array|Closure $callback): void
+    {
+        static::registerModelEvent('anonymized', $callback);
+    }
+
+    /**
+     * Scope a query to records that have not been anonymized yet.
+     */
+    public function scopeNotAnonymized(Builder $query): Builder
+    {
+        return $query->whereNull($this->getAnonymizedAtColumn());
+    }
+
+    /**
+     * Anonymize the model's personal data and stamp anonymized_at.
+     */
+    public function anonymize(): void
+    {
+        if ($this->isAnonymized()) {
+            return;
+        }
+
+        if ($this->fireModelEvent('anonymizing') === false) {
+            return;
+        }
+
+        DB::connection($this->getConnectionName())->transaction(function (): void {
+            foreach ($this->anonymizableFields() as $field => $strategy) {
+                $value = $this->{$field};
+
+                $this->{$field} = match (true) {
+                    $strategy instanceof AnonymizationStrategy => $strategy->apply($value),
+                    is_callable($strategy) => $strategy($value),
+                    default => throw new InvalidArgumentException(sprintf(
+                        'Anonymization strategy for field [%s] on [%s] must be an %s or callable, %s given.',
+                        $field,
+                        static::class,
+                        AnonymizationStrategy::class,
+                        get_debug_type($strategy),
+                    )),
+                };
+            }
+
+            $this->{$this->getAnonymizedAtColumn()} = now();
+            $this->save();
+        });
+
+        $this->fireModelEvent('anonymized', false);
+    }
+
+    /**
+     * Whether this record has already been anonymized.
+     */
+    public function isAnonymized(): bool
+    {
+        return $this->{$this->getAnonymizedAtColumn()} !== null;
+    }
+
+    /**
+     * Column used to stamp the anonymization timestamp.
+     * Override on the model to use a different column name.
+     */
+    public function getAnonymizedAtColumn(): string
+    {
+        return 'anonymized_at';
+    }
+}
