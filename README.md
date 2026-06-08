@@ -9,7 +9,7 @@ composer require contoweb/laravel-privacy-retention
 php artisan vendor:publish --tag=privacy-retention-config
 ```
 
-Requires PHP 8.2+ and Laravel 10, 11, or 12.
+Requires PHP 8.2+ and Laravel 10, 11, 12, or 13.
 
 ## Usage
 
