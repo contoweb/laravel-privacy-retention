@@ -2,7 +2,7 @@
 
 namespace Contoweb\PrivacyRetention\Enums;
 
-use Contoweb\PrivacyRetention\Support\Anonymizer;
+use Contoweb\PrivacyRetention\Anonymizer;
 
 enum AnonymizationStrategy: string
 {

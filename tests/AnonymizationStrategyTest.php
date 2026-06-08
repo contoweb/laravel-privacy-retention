@@ -3,7 +3,7 @@
 namespace Contoweb\PrivacyRetention\Tests;
 
 use Contoweb\PrivacyRetention\Enums\AnonymizationStrategy;
-use Contoweb\PrivacyRetention\Support\Anonymizer;
+use Contoweb\PrivacyRetention\Anonymizer;
 
 class AnonymizationStrategyTest extends TestCase
 {

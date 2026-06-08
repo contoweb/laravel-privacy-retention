@@ -57,7 +57,7 @@ class User extends Model implements Anonymizable
 }
 ```
 
-> Already-anonymized records are filtered out automatically via the `notAnonymized()` scope — no need to add `whereNull('anonymized_at')` yourself. Calling `anonymize()` on an already-anonymized record is a no-op (idempotent), and the field updates plus `anonymized_at` stamp are wrapped in a single DB transaction.
+> Already-anonymized records are filtered out automatically via the `notAnonymized()` scope — no need to add `whereNull('anonymized_at')` yourself. Use `anonymized()` for the inverse (records that have been anonymized). Calling `anonymize()` on an already-anonymized record is a no-op (idempotent), and the field updates plus `anonymized_at` stamp are wrapped in a single DB transaction.
 
 ### 3. Register & schedule
 
@@ -137,6 +137,25 @@ class User extends Model implements Anonymizable
     // ...
 }
 ```
+
+### Save events
+
+The save that stamps `anonymized_at` also fires the usual Eloquent `saving` / `saved` / `updating` / `updated` events by default. Flip the package-wide default in `config/privacy-retention.php`:
+
+```php
+'events' => false, // persist anonymization via saveQuietly()
+```
+
+Or override per model:
+
+```php
+public function shouldFireAnonymizationEvents(): bool
+{
+    return false;
+}
+```
+
+When this returns `false`, the trait uses `saveQuietly()` so listeners on the surrounding save events are skipped. The dedicated `anonymizing` / `anonymized` events still fire either way.
 
 ## Custom column
 

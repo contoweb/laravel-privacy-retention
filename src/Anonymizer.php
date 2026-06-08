@@ -1,6 +1,6 @@
 <?php
 
-namespace Contoweb\PrivacyRetention\Support;
+namespace Contoweb\PrivacyRetention;
 
 use Illuminate\Support\Str;
 

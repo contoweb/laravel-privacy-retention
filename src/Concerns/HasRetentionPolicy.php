@@ -49,6 +49,14 @@ trait HasRetentionPolicy
     }
 
     /**
+     * Scope a query to records that have already been anonymized.
+     */
+    public function scopeAnonymized(Builder $query): Builder
+    {
+        return $query->whereNotNull($this->getAnonymizedAtColumn());
+    }
+
+    /**
      * Anonymize the model's personal data and stamp anonymized_at.
      */
     public function anonymize(): void
@@ -79,7 +87,8 @@ trait HasRetentionPolicy
             }
 
             $this->{$this->getAnonymizedAtColumn()} = now();
-            $this->save();
+
+            $this->shouldFireAnonymizationEvents() ? $this->save() : $this->saveQuietly();
         });
 
         $this->fireModelEvent('anonymized', false);
@@ -100,5 +109,14 @@ trait HasRetentionPolicy
     public function getAnonymizedAtColumn(): string
     {
         return 'anonymized_at';
+    }
+
+    /**
+     * Whether the surrounding Eloquent save events should fire when the model
+     * is anonymized. Override on the model to opt in or out per-model.
+     */
+    public function shouldFireAnonymizationEvents(): bool
+    {
+        return (bool) config('privacy-retention.events', true);
     }
 }
