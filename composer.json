@@ -12,7 +12,8 @@
     "require-dev": {
         "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
         "phpunit/phpunit": "^10.0|^11.0",
-        "laravel/pint": "^1.27"
+        "laravel/pint": "^1.27",
+        "larastan/larastan": "^3.9"
     },
     "autoload": {
         "psr-4": {
@@ -32,12 +33,17 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit",
+        "test": [
+            "vendor/bin/phpunit"
+        ],
         "lint": [
             "pint --parallel"
         ],
         "lint:check": [
             "pint --parallel --test"
+        ],
+        "types:check": [
+            "phpstan analyse"
         ]
     },
     "minimum-stability": "stable",
