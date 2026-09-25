@@ -41,7 +41,7 @@ class MakeRetentionMigrationCommandTest extends TestCase
     public function test_respects_custom_column_option(): void
     {
         Artisan::call('retention:make-migration', [
-            '--table' => 'widgets',
+            '--table'  => 'widgets',
             '--column' => 'masked_at',
         ]);
 

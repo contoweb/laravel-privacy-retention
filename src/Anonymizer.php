@@ -20,7 +20,7 @@ class Anonymizer
 
     public static function email(mixed $value): string
     {
-        return 'anonymized-'.Str::uuid().'@anonymized.invalid';
+        return 'anonymized-' . Str::uuid() . '@anonymized.invalid';
     }
 
     public static function nullify(mixed $value): null
@@ -40,9 +40,9 @@ class Anonymizer
         }
 
         if (Str::length($word) === 1) {
-            return $word.str_repeat('*', 5);
+            return $word . str_repeat('*', 5);
         }
 
-        return Str::substr($word, 0, 1).str_repeat('*', 5).Str::substr($word, -1);
+        return Str::substr($word, 0, 1) . str_repeat('*', 5) . Str::substr($word, -1);
     }
 }

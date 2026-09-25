@@ -2,8 +2,8 @@
 
 namespace Contoweb\PrivacyRetention\Tests;
 
-use Contoweb\PrivacyRetention\Enums\AnonymizationStrategy;
 use Contoweb\PrivacyRetention\Anonymizer;
+use Contoweb\PrivacyRetention\Enums\AnonymizationStrategy;
 
 class AnonymizationStrategyTest extends TestCase
 {

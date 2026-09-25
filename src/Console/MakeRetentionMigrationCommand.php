@@ -19,7 +19,7 @@ class MakeRetentionMigrationCommand extends Command
         $table = $this->resolveTable();
         $column = (string) ($this->option('column') ?: $this->resolveColumn());
 
-        $stub = file_get_contents(__DIR__.'/../../stubs/retention_migration.stub');
+        $stub = file_get_contents(__DIR__ . '/../../stubs/retention_migration.stub');
         $contents = str_replace(['{{ table }}', '{{ column }}'], [$table, $column], $stub);
 
         $path = $this->migrationPath($table, $column);

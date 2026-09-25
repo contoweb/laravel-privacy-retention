@@ -21,11 +21,11 @@ class TestUser extends Model implements Anonymizable
     public function anonymizableFields(): array
     {
         return [
-            'name' => AnonymizationStrategy::String,
-            'email' => AnonymizationStrategy::Email,
-            'notes' => AnonymizationStrategy::Nullify,
+            'name'   => AnonymizationStrategy::String,
+            'email'  => AnonymizationStrategy::Email,
+            'notes'  => AnonymizationStrategy::Nullify,
             'status' => AnonymizationStrategy::Fixed,
-            'phone' => fn (mixed $value): string => 'hash-'.md5((string) $value),
+            'phone'  => fn (mixed $value): string => 'hash-' . md5((string) $value),
         ];
     }
 

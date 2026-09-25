@@ -16,15 +16,15 @@ class RetentionAnonymizeCommandTest extends TestCase
         config()->set('privacy-retention.models', [TestUser::class]);
 
         $stale = TestUser::create([
-            'name' => 'Old User',
-            'email' => 'old@example.com',
-            'active' => false,
+            'name'           => 'Old User',
+            'email'          => 'old@example.com',
+            'active'         => false,
             'deactivated_at' => now()->subYears(2),
         ]);
 
         $fresh = TestUser::create([
-            'name' => 'Active User',
-            'email' => 'active@example.com',
+            'name'   => 'Active User',
+            'email'  => 'active@example.com',
             'active' => true,
         ]);
 
@@ -69,8 +69,8 @@ class RetentionAnonymizeCommandTest extends TestCase
 
         foreach (range(1, 2500) as $i) {
             TestUser::create([
-                'name' => 'User '.$i,
-                'active' => false,
+                'name'           => 'User ' . $i,
+                'active'         => false,
                 'deactivated_at' => now()->subYears(2),
             ]);
         }
@@ -91,6 +91,6 @@ class FakeAnonymizable implements Anonymizable
 
     public static function anonymizableQuery(): Builder
     {
-        return (new Builder(DB::query()));
+        return new Builder(DB::query());
     }
 }

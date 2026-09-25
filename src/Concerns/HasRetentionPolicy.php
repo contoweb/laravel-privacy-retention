@@ -75,8 +75,8 @@ trait HasRetentionPolicy
 
                 $this->{$field} = match (true) {
                     $strategy instanceof AnonymizationStrategy => $strategy->apply($value),
-                    is_callable($strategy) => $strategy($value),
-                    default => throw new InvalidArgumentException(sprintf(
+                    is_callable($strategy)                     => $strategy($value),
+                    default                                    => throw new InvalidArgumentException(sprintf(
                         'Anonymization strategy for field [%s] on [%s] must be an %s or callable, %s given.',
                         $field,
                         static::class,
