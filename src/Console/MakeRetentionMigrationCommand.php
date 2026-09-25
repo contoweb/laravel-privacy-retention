@@ -3,7 +3,6 @@
 namespace Contoweb\PrivacyRetention\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
 use InvalidArgumentException;
 
 class MakeRetentionMigrationCommand extends Command
@@ -15,22 +14,16 @@ class MakeRetentionMigrationCommand extends Command
 
     protected $description = 'Generate a migration that adds the anonymized_at column to a table.';
 
-    public function __construct(private Filesystem $files)
-    {
-        parent::__construct();
-    }
-
     public function handle(): int
     {
         $table = $this->resolveTable();
         $column = (string) ($this->option('column') ?: $this->resolveColumn());
 
-        $stub = $this->files->get(__DIR__.'/../../stubs/retention_migration.stub');
+        $stub = file_get_contents(__DIR__.'/../../stubs/retention_migration.stub');
         $contents = str_replace(['{{ table }}', '{{ column }}'], [$table, $column], $stub);
 
         $path = $this->migrationPath($table, $column);
-        $this->files->ensureDirectoryExists(dirname($path));
-        $this->files->put($path, $contents);
+        file_put_contents($path, $contents);
 
         $this->info(sprintf('Created migration: %s', basename($path)));
 
@@ -78,9 +71,7 @@ class MakeRetentionMigrationCommand extends Command
 
     private function migrationPath(string $table, string $column): string
     {
-        $base = function_exists('database_path')
-            ? database_path('migrations')
-            : getcwd().'/database/migrations';
+        $base = $this->laravel->databasePath('migrations');
 
         $timestamp = date('Y_m_d_His');
         $name = sprintf('add_%s_to_%s_table', $column, $table);
