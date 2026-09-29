@@ -8,6 +8,7 @@ use Contoweb\PrivacyRetention\Tests\Fixtures\MaskedUser;
 use Contoweb\PrivacyRetention\Tests\Fixtures\TestUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 
 class HasRetentionPolicyTest extends TestCase
@@ -29,7 +30,7 @@ class HasRetentionPolicyTest extends TestCase
             'status'         => 'active',
             'phone'          => '0791234567',
             'active'         => false,
-            'deactivated_at' => now()->subYears(2),
+            'deactivated_at' => Carbon::now()->subYears(2),
         ]);
 
         $user->anonymize();
@@ -45,7 +46,7 @@ class HasRetentionPolicyTest extends TestCase
 
     public function test_not_anonymized_scope_excludes_stamped_records(): void
     {
-        TestUser::create(['name' => 'A', 'anonymized_at' => now()]);
+        TestUser::create(['name' => 'A', 'anonymized_at' => Carbon::now()]);
         TestUser::create(['name' => 'B']);
 
         $this->assertSame(1, TestUser::query()->notAnonymized()->count());

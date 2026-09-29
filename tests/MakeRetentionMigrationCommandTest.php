@@ -12,15 +12,15 @@ class MakeRetentionMigrationCommandTest extends TestCase
     {
         parent::setUp();
 
-        File::deleteDirectory(database_path('migrations'));
-        File::ensureDirectoryExists(database_path('migrations'));
+        File::deleteDirectory($this->app->databasePath('migrations'));
+        File::ensureDirectoryExists($this->app->databasePath('migrations'));
     }
 
     public function test_creates_migration_from_table_option(): void
     {
         Artisan::call('retention:make-migration', ['--table' => 'widgets']);
 
-        $files = File::files(database_path('migrations'));
+        $files = File::files($this->app->databasePath('migrations'));
         $this->assertCount(1, $files);
 
         $contents = File::get($files[0]->getPathname());
@@ -32,7 +32,7 @@ class MakeRetentionMigrationCommandTest extends TestCase
     {
         Artisan::call('retention:make-migration', ['--model' => TestUser::class]);
 
-        $files = File::files(database_path('migrations'));
+        $files = File::files($this->app->databasePath('migrations'));
         $contents = File::get($files[0]->getPathname());
 
         $this->assertStringContainsString("Schema::table('test_users'", $contents);
@@ -45,7 +45,7 @@ class MakeRetentionMigrationCommandTest extends TestCase
             '--column' => 'masked_at',
         ]);
 
-        $files = File::files(database_path('migrations'));
+        $files = File::files($this->app->databasePath('migrations'));
         $contents = File::get($files[0]->getPathname());
 
         $this->assertStringContainsString("timestamp('masked_at')", $contents);
