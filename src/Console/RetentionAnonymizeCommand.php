@@ -9,21 +9,24 @@ use RuntimeException;
 
 class RetentionAnonymizeCommand extends Command
 {
+    public function __construct(private readonly array $models)
+    {
+        parent::__construct();
+    }
+
     protected $signature = 'retention:anonymize';
 
     protected $description = 'Anonymize personal data on all configured Anonymizable models past their retention window.';
 
     public function handle(): int
     {
-        $models = (array) config('privacy-retention.models', []);
-
-        if ($models === []) {
+        if ($this->models === []) {
             $this->warn('No models configured in config/privacy-retention.php.');
 
             return self::SUCCESS;
         }
 
-        foreach ($models as $model) {
+        foreach ($this->models as $model) {
             $this->guardContract($model);
 
             $count = 0;

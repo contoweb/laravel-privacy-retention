@@ -3,10 +3,12 @@
 namespace Contoweb\PrivacyRetention\Concerns;
 
 use Closure;
+use Contoweb\PrivacyRetention\Anonymizer;
 use Contoweb\PrivacyRetention\Enums\AnonymizationStrategy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Throwable;
 
 /**
  * Adds anonymization behavior to a model, mirroring the SoftDeletes pattern.
@@ -58,6 +60,8 @@ trait HasRetentionPolicy
 
     /**
      * Anonymize the model's personal data and stamp anonymized_at.
+     *
+     * @throws Throwable
      */
     public function anonymize(): void
     {
@@ -69,12 +73,14 @@ trait HasRetentionPolicy
             return;
         }
 
-        DB::connection($this->getConnectionName())->transaction(function (): void {
+        $anonymizer = app(Anonymizer::class);
+
+        DB::connection($this->getConnectionName())->transaction(function () use ($anonymizer): void {
             foreach ($this->anonymizableFields() as $field => $strategy) {
                 $value = $this->{$field};
 
                 $this->{$field} = match (true) {
-                    $strategy instanceof AnonymizationStrategy => $strategy->apply($value),
+                    $strategy instanceof AnonymizationStrategy => $anonymizer->apply($strategy, $value),
                     is_callable($strategy)                     => $strategy($value),
                     default                                    => throw new InvalidArgumentException(sprintf(
                         'Anonymization strategy for field [%s] on [%s] must be an %s or callable, %s given.',
