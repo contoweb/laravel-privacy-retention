@@ -8,10 +8,10 @@ use Illuminate\Support\Str;
 class Anonymizer
 {
     public function __construct(
-        protected readonly string $maskCharacter = '*',
-        protected readonly int $maskLength = 5,
-        protected readonly string $emailDomain = 'anonymized.invalid',
-        protected readonly string $fixedValue = 'anonymized',
+        protected readonly string $maskCharacter,
+        protected readonly int $maskLength,
+        protected readonly string $emailDomain,
+        protected readonly string $fixedValue,
     ) {}
 
     public function apply(AnonymizationStrategy $strategy, mixed $value): mixed
