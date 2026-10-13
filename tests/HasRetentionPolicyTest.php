@@ -8,6 +8,7 @@ use Contoweb\PrivacyRetention\Tests\Fixtures\MaskedUser;
 use Contoweb\PrivacyRetention\Tests\Fixtures\TestUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 
 class HasRetentionPolicyTest extends TestCase
@@ -23,13 +24,13 @@ class HasRetentionPolicyTest extends TestCase
     public function test_anonymize_applies_every_strategy_and_stamps_timestamp(): void
     {
         $user = TestUser::create([
-            'name' => 'John Doe',
-            'email' => 'john@example.com',
-            'notes' => 'secret',
-            'status' => 'active',
-            'phone' => '0791234567',
-            'active' => false,
-            'deactivated_at' => now()->subYears(2),
+            'name'           => 'John Doe',
+            'email'          => 'john@example.com',
+            'notes'          => 'secret',
+            'status'         => 'active',
+            'phone'          => '0791234567',
+            'active'         => false,
+            'deactivated_at' => Carbon::now()->subYears(2),
         ]);
 
         $user->anonymize();
@@ -38,14 +39,14 @@ class HasRetentionPolicyTest extends TestCase
         $this->assertStringContainsString('@anonymized.invalid', $user->email);
         $this->assertNull($user->notes);
         $this->assertSame('anonymized', $user->status);
-        $this->assertSame('hash-'.md5('0791234567'), $user->phone);
+        $this->assertSame('hash-' . md5('0791234567'), $user->phone);
         $this->assertNotNull($user->anonymized_at);
         $this->assertTrue($user->isAnonymized());
     }
 
     public function test_not_anonymized_scope_excludes_stamped_records(): void
     {
-        TestUser::create(['name' => 'A', 'anonymized_at' => now()]);
+        TestUser::create(['name' => 'A', 'anonymized_at' => Carbon::now()]);
         TestUser::create(['name' => 'B']);
 
         $this->assertSame(1, TestUser::query()->notAnonymized()->count());
@@ -112,11 +113,14 @@ class HasRetentionPolicyTest extends TestCase
     {
         $received = null;
 
-        $user = new class extends Model implements Anonymizable {
+        $user = new class extends Model implements Anonymizable
+        {
             use HasRetentionPolicy;
 
             protected $table = 'test_users';
+
             protected $guarded = [];
+
             public static ?\Closure $capture = null;
 
             public function anonymizableFields(): array
@@ -124,6 +128,7 @@ class HasRetentionPolicyTest extends TestCase
                 return [
                     'name' => function (mixed $value): string {
                         (self::$capture)($value);
+
                         return 'masked';
                     },
                 ];
@@ -148,10 +153,12 @@ class HasRetentionPolicyTest extends TestCase
 
     public function test_invalid_strategy_type_throws(): void
     {
-        $user = new class extends Model implements Anonymizable {
+        $user = new class extends Model implements Anonymizable
+        {
             use HasRetentionPolicy;
 
             protected $table = 'test_users';
+
             protected $guarded = [];
 
             public function anonymizableFields(): array
